@@ -18,6 +18,7 @@ int
 GLfloat	xRot;							// X Rotation
 GLfloat	yRot;							// Y Rotation
 GLfloat zCoord = -5.0f;
+GLfloat earthRotation = 0;
 
 GLuint	texture[2];						// storage for textures
 char textureNames[2][256] = {
@@ -31,7 +32,7 @@ int orbitPoints = 32;
 const int renderTime = 25;				// ms
 const int timerID = 1;
 
-double currentTime = 345.0;			// the number of days from the beginning of the year
+double currentDay = 345.0;			// the number of days from the beginning of the year
 const double daysInOneRender = 4.17e-5; // ~ 1 day in 10 min
 
 cOrbit *satellites = new cOrbit[10];
@@ -181,7 +182,8 @@ void timerFunc(int timerID)
 {
 	if(1 == timerID)
 	{
-		currentTime += daysInOneRender;
+		currentDay += daysInOneRender;
+		earthRotation = -360.0 * ( currentDay - floor(currentDay));
 		glutPostRedisplay(); // redisplay scene
 		glutTimerFunc(renderTime, timerFunc, timerID);
 	}
@@ -296,6 +298,8 @@ void renderSphere(float r, int np )
 
 void renderEarth(void)
 {
+	glRotatef( -180.0f + earthRotation, 0.0f, 0.0f, 1.0f );
+
 	glColor3f( 1.0f, 1.0f, 1.0f );
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
 	renderSphere( 0.9f, earthPoints );
@@ -323,7 +327,7 @@ void renderOrbit(cOrbit sat)
 
 void renderSattelite(cOrbit sat)
 {
-	coord satCoord = sat.calculateCoord(currentTime);
+	coord satCoord = sat.calculateCoord(currentDay);
 
 	glTranslatef( satCoord.x, satCoord.y, satCoord.z );
 	glColor3f( 1.0f, 0.0f, 0.0f );
